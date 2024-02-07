@@ -1,34 +1,39 @@
 package search;
-
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
 public class Main {
+    private static final int COMMAND_EXIT = 0;
+    private static final int COMMAND_SEARCH_A_PERSON = 1;
+    private static final int COMMAND_PRINT_ALL_PEOPLE = 2;
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        //searchIndex(scanner);
-        inputPeopleDetails(scanner);
-
+        String[] peopleDetails = inputPeopleDetails(scanner);
+        printMenu();
+        menu(scanner, peopleDetails);
     }
-    public static void searchIndex(Scanner scanner) {
-        String[] listOfWords = scanner.nextLine().split(" ");
-        String wordToSearch = scanner.nextLine();
-        int index = -1;
-        for (int i = 0; i < listOfWords.length; i++) {
-            String word = listOfWords[i];
-            if (word.equalsIgnoreCase(wordToSearch)) {
-                index = i + 1;
+    public static void menu(Scanner scanner, String[] peopleDetails) {
+        while(true) {
+            int command = -1;
+            try {
+                command = Integer.parseInt(scanner.nextLine());
+            } catch(NumberFormatException e) {
+                System.out.println("Incorrect option! Try again.");
+            }
+            if (command == COMMAND_SEARCH_A_PERSON) {
+                searchQuery(scanner, peopleDetails);
+            } else if (command == COMMAND_PRINT_ALL_PEOPLE) {
+                printAllPeople(peopleDetails);
+            } else if (command == COMMAND_EXIT) {
+                System.out.println("Bye!");
+                break;
+            } else {
+                System.out.println("Incorrect option! Try again.");
             }
         }
-        if (index > 0) {
-            System.out.println(index);
-        } else {
-            System.out.println("Not found");
-        }
     }
 
-    public static void inputPeopleDetails(Scanner scanner) {
+    public static String[] inputPeopleDetails(Scanner scanner) {
         System.out.println("Enter the number of people:");
         int numberOfPeople = Integer.parseInt(scanner.nextLine());
         String[] peopleDetails = new String[numberOfPeople];
@@ -36,30 +41,38 @@ public class Main {
         for (int i = 0; i < numberOfPeople; i++) {
             peopleDetails[i] = scanner.nextLine();
         }
-        searchQuery(scanner, peopleDetails);
+        //searchQuery(scanner, peopleDetails);
+        return peopleDetails;
     }
 
     public static void searchQuery(Scanner scanner, String[] peopleDetails) {
-        System.out.println("Enter the number of search queries:");
-
-        int numberOfQueries = Integer.parseInt(scanner.nextLine());
-        for (int i = 0; i < numberOfQueries; i++) {
+        System.out.println("Enter a name or email to search all suitable people.");
             boolean isPersonFound = false;
-            System.out.println("Enter data to search people:");
             String query = scanner.nextLine().trim();
             for (String people : peopleDetails) {
                 if(people.toLowerCase().contains(query.toLowerCase())) {
                     if(!isPersonFound) {
-                        System.out.println("Found people:");
                         isPersonFound = true;
                     }
                     System.out.println(people);
                 }
-            }
             if (!isPersonFound) {
                 System.out.println("No matching people found.");
             }
         }
+    }
+
+    public static void printAllPeople(String[] peopleDetails) {
+        System.out.println("=== List of people ===");
+        for (String person : peopleDetails) {
+            System.out.println(person);
+        }
+    }
+    public static void printMenu() {
+        System.out.println("=== Menu ===");
+        System.out.println("1. Find a person");
+        System.out.println("2. Print all people");
+        System.out.println("0. Exit");
     }
 }
 
