@@ -88,45 +88,84 @@ public class Main {
             invertedIndex.get(term.toLowerCase()).add(documentId);
         }
     }
+public static void searchQuery(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
+    printMatchingStrategy();
+    String strategyPattern = scanner.nextLine().trim();
+    System.out.println("Enter a name or email to search all suitable people:");
+    String[] query = scanner.nextLine().trim().toLowerCase().split("\\s+");
 
-    public static void searchQuery(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
-        printMatchingStrategy();
-        String strategyPattern = scanner.nextLine().trim();
+    Set<Integer> matchingDocuments = filterMatchingDocuments(strategyPattern, query, invertedIndex);
 
-        System.out.println("Enter a name or email to search all suitable people:");
-        String[] query = scanner.nextLine().trim().toLowerCase().split("\\s+");
+    printMatchingResults(matchingDocuments, peopleDetails);
+}
+
+    private static Set<Integer> filterMatchingDocuments(String strategyPattern, String[] query, Map<String, Set<Integer>> invertedIndex) {
         Set<Integer> matchingDocuments = new HashSet<>();
-        if (strategyPattern.equalsIgnoreCase(COMMAND_ALL)) {
-            for (String term : query) {
-                if (invertedIndex.containsKey(term.toLowerCase())) {
-                    if (matchingDocuments.isEmpty()) {
-                        matchingDocuments.addAll(invertedIndex.get(term.toLowerCase()));
-                    } else {
-                        matchingDocuments.retainAll(invertedIndex.get(term.toLowerCase()));
-                    }
-                } else {
-                    matchingDocuments = Collections.emptySet();
-                    break;
-                }
-            }
-        } else if (strategyPattern.equalsIgnoreCase(COMMAND_ANY)) {
-            for (String term : query) {
-                if (invertedIndex.containsKey(term.toLowerCase())) {
-                    matchingDocuments.addAll(invertedIndex.get(term.toLowerCase()));
-                }
-            }
-        } else if (strategyPattern.equalsIgnoreCase(COMMAND_NONE)) {
-            for (String key : invertedIndex.keySet()) {
-                matchingDocuments.addAll(invertedIndex.get(key));
-            }
-            for (String term : query) {
-                if (invertedIndex.containsKey(term.toLowerCase())) {
-                    matchingDocuments.removeAll(invertedIndex.get(term.toLowerCase()));
-                }
-            }
-        } else {
-            System.out.println("Please Select correct Strategy");
+
+        switch (strategyPattern.toUpperCase()) {
+            case COMMAND_ALL:
+                matchingDocuments = filterMatchingDocumentsForAll(query, invertedIndex);
+                break;
+            case COMMAND_ANY:
+                matchingDocuments = filterMatchingDocumentsForAny(query, invertedIndex);
+                break;
+            case COMMAND_NONE:
+                matchingDocuments = filterMatchingDocumentsForNone(query, invertedIndex);
+                break;
+            default:
+                System.out.println("Please select a correct strategy.");
         }
+
+        return matchingDocuments;
+    }
+
+    private static Set<Integer> filterMatchingDocumentsForAll(String[] query, Map<String, Set<Integer>> invertedIndex) {
+        Set<Integer> matchingDocuments = new HashSet<>();
+
+        for (String term : query) {
+            if (invertedIndex.containsKey(term)) {
+                if (matchingDocuments.isEmpty()) {
+                    matchingDocuments.addAll(invertedIndex.get(term));
+                } else {
+                    matchingDocuments.retainAll(invertedIndex.get(term));
+                }
+            } else {
+                return Collections.emptySet();
+            }
+        }
+
+        return matchingDocuments;
+    }
+
+    private static Set<Integer> filterMatchingDocumentsForAny(String[] query, Map<String, Set<Integer>> invertedIndex) {
+        Set<Integer> matchingDocuments = new HashSet<>();
+
+        for (String term : query) {
+            if (invertedIndex.containsKey(term)) {
+                matchingDocuments.addAll(invertedIndex.get(term));
+            }
+        }
+
+        return matchingDocuments;
+    }
+
+    private static Set<Integer> filterMatchingDocumentsForNone(String[] query, Map<String, Set<Integer>> invertedIndex) {
+        Set<Integer> matchingDocuments = new HashSet<>();
+
+        for (Set<Integer> documentIds : invertedIndex.values()) {
+            matchingDocuments.addAll(documentIds);
+        }
+
+        for (String term : query) {
+            if (invertedIndex.containsKey(term)) {
+                matchingDocuments.removeAll(invertedIndex.get(term));
+            }
+        }
+
+        return matchingDocuments;
+    }
+
+    private static void printMatchingResults(Set<Integer> matchingDocuments, List<String> peopleDetails) {
         if (!matchingDocuments.isEmpty()) {
             System.out.println("Found people:");
             for (int documentId : matchingDocuments) {
@@ -136,6 +175,7 @@ public class Main {
             System.out.println("No matching people found.");
         }
     }
+
 
     public static void printAllPeople(List<String> peopleDetails) {
         System.out.println("=== List of people ===");
