@@ -21,21 +21,29 @@ public class Main {
 
     public static void menu(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
         while (true) {
-            int command = -1;
-            try {
-                command = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Incorrect option! Try again.");
+            System.out.println("Enter your choice:");
+            int command = getIntegerInput(scanner);
+            switch (command) {
+                case COMMAND_SEARCH_A_PERSON:
+                    searchQuery(scanner, peopleDetails, invertedIndex);
+                    break;
+                case COMMAND_PRINT_ALL_PEOPLE:
+                    printAllPeople(peopleDetails);
+                    break;
+                case COMMAND_EXIT:
+                    System.out.println("Bye!");
+                    return;
+                default:
+                    System.out.println("Incorrect option! Try again.");
             }
-            if (command == COMMAND_SEARCH_A_PERSON) {
-                searchQuery(scanner, peopleDetails, invertedIndex);
-            } else if (command == COMMAND_PRINT_ALL_PEOPLE) {
-                printAllPeople(peopleDetails);
-            } else if (command == COMMAND_EXIT) {
-                System.out.println("Bye!");
-                break;
-            } else {
-                System.out.println("Incorrect option! Try again.");
+        }
+    }
+    public static int getIntegerInput(Scanner scanner) {
+        while (true) {
+            try {
+                return Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a number.");
             }
         }
     }
@@ -82,7 +90,7 @@ public class Main {
         System.out.println("Enter a name or email to search all suitable people:");
         String[] query = scanner.nextLine().trim().toLowerCase().split("\\s+");
         Set<Integer> matchingDocuments = new HashSet<>();
-        if (strategyPattern.equalsIgnoreCase("ALL")) {
+        if (strategyPattern.equalsIgnoreCase(COMMAND_ALL)) {
             for (String term : query) {
                 if (invertedIndex.containsKey(term.toLowerCase())) {
                     if (matchingDocuments.isEmpty()) {
@@ -95,13 +103,13 @@ public class Main {
                     break;
                 }
             }
-        } else if (strategyPattern.equalsIgnoreCase("ANY")) {
+        } else if (strategyPattern.equalsIgnoreCase(COMMAND_ANY)) {
             for (String term : query) {
                 if (invertedIndex.containsKey(term.toLowerCase())) {
                     matchingDocuments.addAll(invertedIndex.get(term.toLowerCase()));
                 }
             }
-        } else if (strategyPattern.equalsIgnoreCase("NONE")) {
+        } else if (strategyPattern.equalsIgnoreCase(COMMAND_NONE)) {
             for (String key : invertedIndex.keySet()) {
                 matchingDocuments.addAll(invertedIndex.get(key));
             }
@@ -140,7 +148,4 @@ public class Main {
         System.out.println("Select a matching strategy: ALL, ANY, NONE");
     }
 
-    public static void strategyAll() {
-
-    }
 }
