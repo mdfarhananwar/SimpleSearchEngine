@@ -52,27 +52,33 @@ public class Main {
         List<String> peopleDetails = new ArrayList<>();
         if (args[0].equals("--data")) {
             String filePath = args[1]; // Provide the path to your text file
-            try (Scanner scannerFile = new Scanner(new File(filePath))) {
-                int documentId = 0;
-                while (scannerFile.hasNextLine()) {
-                    String line = scannerFile.nextLine();
-                    peopleDetails.add(line);
-                    updateInvertedIndex(line, ++documentId, invertedIndex);
-                }
-            } catch (FileNotFoundException e) {
-                System.out.println("Fail");
-            }
+            readFile(filePath, peopleDetails, invertedIndex);
         } else {
-            System.out.println("Enter the number of people:");
-            int numberOfPeople = Integer.parseInt(scanner.nextLine());
-            System.out.println("Enter all people:");
-            for (int i = 0; i < numberOfPeople; i++) {
-                String line = scanner.nextLine();
-                peopleDetails.add(line);
-                updateInvertedIndex(line, i + 1, invertedIndex);
-            }
+            readLine(scanner,peopleDetails,invertedIndex);
         }
         return peopleDetails;
+    }
+    public static void readFile(String filePath, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
+        try (Scanner scannerFile = new Scanner(new File(filePath))) {
+            int documentId = 0;
+            while (scannerFile.hasNextLine()) {
+                String line = scannerFile.nextLine();
+                peopleDetails.add(line);
+                updateInvertedIndex(line, ++documentId, invertedIndex);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Fail");
+        }
+    }
+    public static void readLine(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
+        System.out.println("Enter the number of people:");
+        int numberOfPeople = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter all people:");
+        for (int i = 0; i < numberOfPeople; i++) {
+            String line = scanner.nextLine();
+            peopleDetails.add(line);
+            updateInvertedIndex(line, i + 1, invertedIndex);
+        }
     }
 
     public static void updateInvertedIndex(String line, int documentId, Map<String, Set<Integer>> invertedIndex) {
