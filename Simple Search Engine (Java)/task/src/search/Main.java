@@ -19,6 +19,23 @@ public class Main {
         menu(scanner, peopleDetails, invertedIndex);
     }
 
+    public static List<String> inputPeopleDetails(Scanner scanner, String[] args, Map<String, Set<Integer>> invertedIndex) {
+        List<String> peopleDetails = new ArrayList<>();
+        if (args[0].equals("--data")) {
+            String filePath = args[1]; // Provide the path to your text file
+            readFile(filePath, peopleDetails, invertedIndex);
+        } else {
+            readLine(scanner,peopleDetails,invertedIndex);
+        }
+        return peopleDetails;
+    }
+    public static void printMenu() {
+        System.out.println("=== Menu ===");
+        System.out.println("1. Find a person");
+        System.out.println("2. Print all people");
+        System.out.println("0. Exit");
+    }
+
     public static void menu(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
         while (true) {
             System.out.println("Enter your choice:");
@@ -38,26 +55,24 @@ public class Main {
             }
         }
     }
-    public static int getIntegerInput(Scanner scanner) {
-        while (true) {
-            try {
-                return Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input! Please enter a number.");
-            }
+
+    public static void printAllPeople(List<String> peopleDetails) {
+        System.out.println("=== List of people ===");
+        for (String person : peopleDetails) {
+            System.out.println(person);
         }
+    }
+    public static void searchQuery(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
+        printMatchingStrategy();
+        String strategyPattern = scanner.nextLine().trim();
+        System.out.println("Enter a name or email to search all suitable people:");
+        String[] query = scanner.nextLine().trim().toLowerCase().split("\\s+");
+        Set<Integer> matchingDocuments = filterMatchingDocuments(strategyPattern, query, invertedIndex);
+        printMatchingResults(matchingDocuments, peopleDetails);
     }
 
-    public static List<String> inputPeopleDetails(Scanner scanner, String[] args, Map<String, Set<Integer>> invertedIndex) {
-        List<String> peopleDetails = new ArrayList<>();
-        if (args[0].equals("--data")) {
-            String filePath = args[1]; // Provide the path to your text file
-            readFile(filePath, peopleDetails, invertedIndex);
-        } else {
-            readLine(scanner,peopleDetails,invertedIndex);
-        }
-        return peopleDetails;
-    }
+    //Helper Methods :-
+
     public static void readFile(String filePath, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
         try (Scanner scannerFile = new Scanner(new File(filePath))) {
             int documentId = 0;
@@ -81,6 +96,16 @@ public class Main {
         }
     }
 
+    public static int getIntegerInput(Scanner scanner) {
+        while (true) {
+            try {
+                return Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a number.");
+            }
+        }
+    }
+
     public static void updateInvertedIndex(String line, int documentId, Map<String, Set<Integer>> invertedIndex) {
         String[] terms = line.split("\\s+");
         for (String term : terms) {
@@ -88,16 +113,6 @@ public class Main {
             invertedIndex.get(term.toLowerCase()).add(documentId);
         }
     }
-public static void searchQuery(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
-    printMatchingStrategy();
-    String strategyPattern = scanner.nextLine().trim();
-    System.out.println("Enter a name or email to search all suitable people:");
-    String[] query = scanner.nextLine().trim().toLowerCase().split("\\s+");
-
-    Set<Integer> matchingDocuments = filterMatchingDocuments(strategyPattern, query, invertedIndex);
-
-    printMatchingResults(matchingDocuments, peopleDetails);
-}
 
     private static Set<Integer> filterMatchingDocuments(String strategyPattern, String[] query, Map<String, Set<Integer>> invertedIndex) {
         Set<Integer> matchingDocuments = new HashSet<>();
@@ -177,19 +192,8 @@ public static void searchQuery(Scanner scanner, List<String> peopleDetails, Map<
     }
 
 
-    public static void printAllPeople(List<String> peopleDetails) {
-        System.out.println("=== List of people ===");
-        for (String person : peopleDetails) {
-            System.out.println(person);
-        }
-    }
 
-    public static void printMenu() {
-        System.out.println("=== Menu ===");
-        System.out.println("1. Find a person");
-        System.out.println("2. Print all people");
-        System.out.println("0. Exit");
-    }
+
     public static void printMatchingStrategy() {
         System.out.println("Select a matching strategy: ALL, ANY, NONE");
     }
