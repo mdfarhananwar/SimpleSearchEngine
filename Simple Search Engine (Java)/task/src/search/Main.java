@@ -7,6 +7,9 @@ public class Main {
     private static final int COMMAND_EXIT = 0;
     private static final int COMMAND_SEARCH_A_PERSON = 1;
     private static final int COMMAND_PRINT_ALL_PEOPLE = 2;
+    private static final String COMMAND_ALL = "ALL";
+    private static final String COMMAND_ANY = "ANY";
+    private static final String COMMAND_NONE = "NONE";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -73,9 +76,43 @@ public class Main {
     }
 
     public static void searchQuery(Scanner scanner, List<String> peopleDetails, Map<String, Set<Integer>> invertedIndex) {
+        printMatchingStrategy();
+        String strategyPattern = scanner.nextLine().trim();
+
         System.out.println("Enter a name or email to search all suitable people:");
-        String query = scanner.nextLine().trim().toLowerCase();
-        Set<Integer> matchingDocuments = invertedIndex.getOrDefault(query, Collections.emptySet());
+        String[] query = scanner.nextLine().trim().toLowerCase().split("\\s+");
+        Set<Integer> matchingDocuments = new HashSet<>();
+        if (strategyPattern.equalsIgnoreCase("ALL")) {
+            for (String term : query) {
+                if (invertedIndex.containsKey(term.toLowerCase())) {
+                    if (matchingDocuments.isEmpty()) {
+                        matchingDocuments.addAll(invertedIndex.get(term.toLowerCase()));
+                    } else {
+                        matchingDocuments.retainAll(invertedIndex.get(term.toLowerCase()));
+                    }
+                } else {
+                    matchingDocuments = Collections.emptySet();
+                    break;
+                }
+            }
+        } else if (strategyPattern.equalsIgnoreCase("ANY")) {
+            for (String term : query) {
+                if (invertedIndex.containsKey(term.toLowerCase())) {
+                    matchingDocuments.addAll(invertedIndex.get(term.toLowerCase()));
+                }
+            }
+        } else if (strategyPattern.equalsIgnoreCase("NONE")) {
+            for (String key : invertedIndex.keySet()) {
+                matchingDocuments.addAll(invertedIndex.get(key));
+            }
+            for (String term : query) {
+                if (invertedIndex.containsKey(term.toLowerCase())) {
+                    matchingDocuments.removeAll(invertedIndex.get(term.toLowerCase()));
+                }
+            }
+        } else {
+            System.out.println("Please Select correct Strategy");
+        }
         if (!matchingDocuments.isEmpty()) {
             System.out.println("Found people:");
             for (int documentId : matchingDocuments) {
@@ -98,5 +135,12 @@ public class Main {
         System.out.println("1. Find a person");
         System.out.println("2. Print all people");
         System.out.println("0. Exit");
+    }
+    public static void printMatchingStrategy() {
+        System.out.println("Select a matching strategy: ALL, ANY, NONE");
+    }
+
+    public static void strategyAll() {
+
     }
 }
